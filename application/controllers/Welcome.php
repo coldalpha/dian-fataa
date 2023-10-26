@@ -31,7 +31,9 @@ class Welcome extends CI_Controller
 		// Logika untuk mengambil data dari API
 		$this->load->database();
 		$this->db->select('nama, kata_ucapan');
-		$query = $this->db->get('ucapan');
+		$this->db->from('ucapan');
+		$this->db->order_by('id', 'DESC');
+		$query = $this->db->get();
 		$data['data'] = $query->result();
 
 		// Menampilkan data di view
@@ -64,13 +66,19 @@ class Welcome extends CI_Controller
 			'kata_ucapan' => $kata_ucapan
 		);
 
-		$this->db->insert('ucapan', $data);
-
-		// Periksa apakah data berhasil disimpan
-		if ($this->db->affected_rows() > 0) {
-			echo "Ucapan berhasil disimpan!";
+		if ($this->db->insert('ucapan', $data)) {
+			// Jika insert berhasil
+			$pesan['success'] = true;
+			$pesan['pesan'] = "Data berhasil disimpan";
 		} else {
-			echo "Gagal menyimpan ucapan. Silakan coba lagi.";
+			// Jika insert gagal
+			$pesan['success'] = false;
+			$pesan['pesan'] = "Gagal menyimpan ucapan. Silakan coba lagi.";
 		}
+
+		// Atur tipe konten sebagai JSON dan kirim respons
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($pesan));
 	}
 }
